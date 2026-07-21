@@ -109,34 +109,112 @@ void loop() {
 }
 ```
 
-### Not sure of your I2C address?
+> 💡 This same sketch lives in [`Arduino/01_Hello_World`](Arduino/01_Hello_World), fully commented — and it's the first step of a [step-by-step tutorial series](#step-by-step-arduino-examples) that takes you from here to a working progress bar and clock.
 
-If `0x27` doesn't work, run an **I2C scanner** sketch to discover the address, then update the value in `LiquidCrystal_I2C lcd(0x27, 16, 2);`.
+---
+
+## Find Your I2C Address
+
+Most of these modules use address **`0x27`**, but some use **`0x3F`**. If the backlight comes on but no text appears — and the contrast is already adjusted — you are most likely talking to the wrong address.
+
+Rather than guess, **run the I2C scanner**. Ready-to-run versions are included in this repository:
+
+| Folder         | File                          | Runs on                                            |
+| :------------- | :---------------------------- | :------------------------------------------------- |
+| `Arduino/`     | `00_I2C_Scanner/00_I2C_Scanner.ino` | Arduino UNO / Nano / Mega **and** ESP32-S3 / ESP32 |
+| `MicroPython/` | `00_i2c_scan.py`                    | ESP32-S3 / ESP32 / Raspberry Pi Pico               |
+
+### Run it on Arduino
+
+1. Open **`Arduino/00_I2C_Scanner/00_I2C_Scanner.ino`** in the Arduino IDE
+2. *(ESP32 only)* Set your wiring at the top of the sketch — any free GPIO works:
+   ```cpp
+   #define I2C_SDA_PIN 8
+   #define I2C_SCL_PIN 9
+   ```
+3. Select your board and port, then click **Upload**
+4. Open **Tools → Serial Monitor** and set the baud rate:
+   - **9600** for Arduino UNO
+   - **115200** for ESP32-S3
+
+> The same sketch works on both boards — it detects the target at compile time and picks the right pins and baud rate for you. On the UNO it uses the fixed `A4` / `A5` pins; on the ESP32 it uses the GPIOs you defined above.
+
+The scanner re-scans every 5 seconds. When it finds your display you will see:
+
+<p align="center">
+  <img src="images/i2c-scan.png" alt="Serial Monitor output showing an I2C device found at address 0x27" width="720">
+</p>
+
+That's your address. Now update the "Hello, World!" sketch to match:
 
 ```cpp
-#include <Wire.h>
-
-void setup() {
-  Wire.begin();
-  Serial.begin(9600);
-  while (!Serial);
-  Serial.println("I2C Scanner");
-}
-
-void loop() {
-  byte count = 0;
-  for (byte addr = 1; addr < 127; addr++) {
-    Wire.beginTransmission(addr);
-    if (Wire.endTransmission() == 0) {
-      Serial.print("Found device at 0x");
-      Serial.println(addr, HEX);
-      count++;
-    }
-  }
-  Serial.println(count ? "Done." : "No I2C devices found.");
-  delay(5000);
-}
+LiquidCrystal_I2C lcd(0x27, 16, 2);   // <- change 0x27 to the address you found
 ```
+
+### Run it on MicroPython
+
+1. Copy **`MicroPython/00_i2c_scan.py`** to your board (Thonny, `mpremote`, or your editor of choice)
+2. Set the pins near the top of the file to match your wiring:
+   ```python
+   SDA_PIN = 8
+   SCL_PIN = 9
+   ```
+3. Run it — with `mpremote` that's simply:
+   ```bash
+   mpremote run MicroPython/00_i2c_scan.py
+   ```
+
+You'll get the same result, printed to the REPL.
+
+> 🐍 New to MicroPython? The [`MicroPython/` folder](MicroPython) has a full guide to installing the firmware with Thonny, plus its own step-by-step tutorial series.
+
+### "No I2C devices found"
+
+If the scan comes back empty, it's a wiring problem rather than an address problem — check `VCC` (5 V), `GND`, and that `SDA` and `SCL` are not swapped. On a 3.3 V board, also confirm your logic level converter is powered on **both** sides.
+
+---
+
+## Step-by-Step Arduino Examples
+
+Got text on the screen? Great — now learn what else this display can do. The `Arduino/` folder contains a numbered tutorial series. Each sketch teaches **one new idea**, builds on the one before it, and is commented line by line.
+
+Work through them in order:
+
+| # | Sketch | What you'll learn |
+| :-- | :--------------------------------------------------- | :---------------------------------------------------------------------------- |
+| 00 | [`00_I2C_Scanner`](Arduino/00_I2C_Scanner)             | Find your display's I2C address (start here if nothing shows up)               |
+| 01 | [`01_Hello_World`](Arduino/01_Hello_World)             | `init()`, `backlight()`, and placing text with `setCursor(column, row)`        |
+| 02 | [`02_Cursor_And_Blink`](Arduino/02_Cursor_And_Blink)   | The underline cursor, the blinking block, and hiding the text vs. the backlight |
+| 03 | [`03_Counter`](Arduino/03_Counter)                     | Displaying changing numbers — and fixing the classic "ghost digit" bug          |
+| 04 | [`04_Scrolling_Text`](Arduino/04_Scrolling_Text)       | Three ways to scroll messages longer than 16 characters                        |
+| 05 | [`05_Custom_Characters`](Arduino/05_Custom_Characters) | Design your own 5×8 symbols — hearts, bells, degree signs                      |
+| 06 | [`06_Serial_To_LCD`](Arduino/06_Serial_To_LCD)         | Type in the Serial Monitor, watch it appear on the LCD                         |
+| 07 | [`07_Progress_Bar`](Arduino/07_Progress_Bar)           | **Capstone** — a smooth 80-step progress bar built from custom characters      |
+| 08 | [`08_Digital_Clock`](Arduino/08_Digital_Clock)         | **Capstone** — a flicker-free clock using `millis()` and `snprintf()`          |
+
+### Before you upload
+
+Every sketch assumes address **`0x27`**. If [your scan](#find-your-i2c-address) reported something else, change this line at the top of the sketch:
+
+```cpp
+LiquidCrystal_I2C lcd(0x27, 16, 2);   // <- your address here
+```
+
+### Using an ESP32-S3?
+
+The tutorial sketches are written for the Arduino UNO to keep them easy to read. To run one on an ESP32, uncomment the `Wire.begin()` line in `setup()` and set your own GPIOs:
+
+```cpp
+void setup() {
+  Wire.begin(8, 9);   // <- your SDA, SCL
+
+  lcd.init();
+  ...
+```
+
+> ⚠️ That line **must come before `lcd.init()`**. The library calls `Wire.begin()` internally with no pins, so if you initialise the bus first your pin choice is kept — do it the other way round and your GPIOs are ignored.
+
+Sketches that print to the Serial Monitor use **9600** baud.
 
 ---
 
@@ -145,7 +223,7 @@ void loop() {
 | Symptom                              | Likely Cause / Fix                                                                 |
 | :----------------------------------- | :--------------------------------------------------------------------------------- |
 | Solid blocks or blank screen         | Adjust the **contrast** trimmer (see above) — gently, ~1 turn max                  |
-| Backlight on, but no text            | Wrong I2C address — run the **I2C scanner** and update the address in your sketch  |
+| Backlight on, but no text            | Wrong I2C address — run the [**I2C scanner**](#find-your-i2c-address) and update the address in your sketch |
 | Nothing at all / no backlight        | Check `VCC` (5 V) and `GND` wiring                                                 |
 | Garbled characters on a 3.3 V board  | Add a **logic level converter** on `SDA`/`SCL` (see 5 V Operation above)           |
 
