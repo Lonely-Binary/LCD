@@ -21,7 +21,7 @@ This guide covers wiring, contrast adjustment, the recommended Arduino library, 
 Unlike traditional character LCDs that require a separate I2C "backpack" module soldered to the 16-pin header, the Lonely Binary LCD has the **I2C function built right into the board**. The highlighted chip below is the on-board I2C controller — this is what keeps the module slim and easy to wire.
 
 <p align="center">
-  <img src="images/lcd-i2c-onboard-chip.jpg" alt="Lonely Binary 1602 LCD showing the on-board I2C controller chip highlighted" width="640">
+  <img src="images/lcd-i2c-onboard-chip.png" alt="Lonely Binary 1602 LCD showing the on-board I2C controller chip highlighted" width="640">
 </p>
 
 ---
@@ -48,7 +48,7 @@ To protect your microcontroller, we strongly recommend placing a **Lonely Binary
 > 🛒 **Lonely Binary 2CH Logic Level Converter:** https://www.amazon.com/dp/B0FFMLDYNY
 
 <p align="center">
-  <img src="images/lonely-binary-logic-level-converter.jpg" alt="Lonely Binary 2/4/6 Channel Bi-Directional Logic Level Converter" width="640">
+  <img src="images/lonely-binary-logic-level-converter.png" alt="Lonely Binary 2/4/6 Channel Bi-Directional Logic Level Converter" width="640">
 </p>
 
 ---
@@ -58,7 +58,7 @@ To protect your microcontroller, we strongly recommend placing a **Lonely Binary
 When you first power up the display, you may see **solid blocks**, extremely faint text, or nothing at all. This is almost always a **contrast** setting — not a fault.
 
 <p align="center">
-  <img src="images/lcd-contrast-blocks.jpg" alt="1602 LCD showing solid blocks instead of characters — contrast needs adjusting" width="640">
+  <img src="images/lcd-contrast-blocks.png" alt="1602 LCD showing solid blocks instead of characters — contrast needs adjusting" width="640">
 </p>
 
 To fix it, use a small screwdriver to gently turn the **contrast potentiometer** (the tiny blue trimmer on the board) until the characters become clear.
@@ -77,7 +77,7 @@ For the Arduino IDE, we recommend the **`LiquidCrystal I2C`** library by **Frank
 4. Select the library by **Frank de Brabander** and click **Install**
 
 <p align="center">
-  <img src="images/liquidcrystal-i2c-library.jpg" alt="LiquidCrystal I2C library by Frank de Brabander in the Arduino Library Manager" width="360">
+  <img src="images/liquidcrystal-i2c-library.png" alt="LiquidCrystal I2C library by Frank de Brabander in the Arduino Library Manager" width="360">
 </p>
 
 ---
